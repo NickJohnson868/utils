@@ -37,14 +37,11 @@ std::string Util::generate_uuid(bool b_upper, bool b_delimiter)
 
 void Util::print_progress_bar(int row, int total)
 {
-	const int bar_width = 50;  // 进度条的宽度
-
-	// 计算进度
+	const int bar_width = 50;
 	double progress = static_cast<double>(row) / total;
-
-	printf("[");
 	int pos = static_cast<int>(bar_width * progress);
 
+	printf(" [");
 	for (int i = 0; i < bar_width; ++i)
 	{
 		if (i < pos) printf("=");

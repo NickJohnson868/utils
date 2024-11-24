@@ -142,8 +142,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="test001.cpp" />
     <ClCompile Include="test002.cpp" />
+    <ClCompile Include="test003.cpp" />
     <ClCompile Include="util\_file.cpp" />
-    <ClCompile Include="util\inject.cpp" />
+    <ClCompile Include="util\_inject.cpp" />
     <ClCompile Include="util\util.cpp" />
     <ClCompile Include="util\_math.cpp" />
     <ClCompile Include="util\_proc.cpp" />
@@ -154,7 +155,7 @@
   <ItemGroup>
     <ClInclude Include="test.h" />
     <ClInclude Include="util\_file.h" />
-    <ClInclude Include="util\inject.h" />
+    <ClInclude Include="util\_inject.h" />
     <ClInclude Include="util\util.h" />
     <ClInclude Include="util\_math.h" />
     <ClInclude Include="util\_proc.h" />

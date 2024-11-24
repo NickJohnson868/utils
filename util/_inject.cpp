@@ -5,10 +5,10 @@
 #include <string>
 #include <set>
 
-#include "inject.h"
+#include "_inject.h"
 
 // 提升进程访问权限
-bool enable_debug_priv()
+bool _Inject::enable_debug_priv()
 {
     HANDLE hToken;
     LUID sedebugnameValue;
@@ -34,7 +34,7 @@ bool enable_debug_priv()
 }
 
 // 卸载DLL
-bool uninject_dll(DWORD dwProcessId, std::wstring dll_name)
+bool _Inject::uninject_dll(DWORD dwProcessId, std::wstring dll_name)
 {
     if (dwProcessId == 0)
     {
@@ -112,7 +112,7 @@ bool uninject_dll(DWORD dwProcessId, std::wstring dll_name)
 }
 
 // 注入DLL
-bool inject_dll(DWORD pid, std::wstring dll_path)
+bool _Inject::inject_dll(DWORD pid, std::wstring dll_path)
 {
     HANDLE hprocess = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
     if (!hprocess)

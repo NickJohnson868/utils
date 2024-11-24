@@ -13,9 +13,11 @@ using namespace std;
 
 int main()
 {
-	Test::run001();
+	//Test::run001();
 
-	Test::run002();
+	//Test::run002();
+
+	Test::run003();
 
 	return 0;
 }

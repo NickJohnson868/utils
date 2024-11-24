@@ -1,4 +1,6 @@
 #include "test.h"
+#include "util/_time.h"
+#include "util/_math.h"
 
 #include <iostream>
 #include <cmath>
@@ -8,8 +10,6 @@
 #include <algorithm>
 #include <functional>
 #include <type_traits>
-#include "util/_time.h"
-#include "util/_math.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -110,7 +110,13 @@ namespace Test
 
 	void run001()
 	{
-		for (int i = 1; i <= 7; i++)
+		auto rate = [](double base, double b)
+			{
+				//return (1.0 / b - 1.0 / base) / (1.0 / base) * 100;
+				return (base / b - 1) * 100;
+			};
+
+		for (int i = 6; i <= 6; i++)
 		{
 			double a = daffodils(i, false, true, false, false);
 			double b = daffodils(i, false, false, false, false); // 使用10线程
@@ -118,11 +124,11 @@ namespace Test
 			double d = daffodils(i, false, true, true, false); // 使用快速幂
 			double e = daffodils(i, false, true, false, true); // 使用连乘
 			double f = daffodils(i, true, false, true, false); // 都用
-			printf("daffodils(%d) 使用10线程快了 %.2lf%%\n", i, (a - b) / a * 100);
-			printf("daffodils(%d) 使用缓存快了 %.2lf%%\n", i, (a - c) / a * 100);
-			printf("daffodils(%d) 使用快速幂快了 %.2lf%%\n", i, (a - d) / a * 100);
-			printf("daffodils(%d) 使用连乘快了 %.2lf%%\n", i, (a - e) / a * 100);
-			printf("daffodils(%d) 全使用(快速幂)快了 %.2lf%%\n\n", i, (a - f) / a * 100);
+			printf("daffodils(%d) 使用10线程快了 %.2lf%%\n", i, rate(a, b));
+			printf("daffodils(%d) 使用缓存快了 %.2lf%%\n", i, rate(a, c));
+			printf("daffodils(%d) 使用快速幂快了 %.2lf%%\n", i, rate(a, d));
+			printf("daffodils(%d) 使用连乘快了 %.2lf%%\n", i, rate(a, e));
+			printf("daffodils(%d) 全使用(快速幂)快了 %.2lf%%\n\n", i, rate(a, f));
 		}
 	}
 }
