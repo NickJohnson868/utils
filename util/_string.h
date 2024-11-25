@@ -15,6 +15,9 @@ public:
 	static std::string gbk_to_utf8(const std::string& str_gbk);
 	static std::string utf8_to_gbk(const std::string& str_utf8);
 
+	static bool is_utf8(const std::string& str);
+	static bool is_gbk(const std::string& str);
+
 	template <typename StringT>
 	static StringT replace_all(StringT str, const StringT& target, const StringT& dest)
 	{

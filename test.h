@@ -7,4 +7,6 @@ namespace Test
 	void run002();
 
 	void run003();
+
+	void run004();
 }

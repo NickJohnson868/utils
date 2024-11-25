@@ -15,7 +15,7 @@ int main()
 {
 	//Test::run001();
 
-	//Test::run002();
+	Test::run002();
 
 	Test::run003();
 

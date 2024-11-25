@@ -48,15 +48,15 @@ bool _File::clear_file(const std::wstring& path)
 	return file.good();
 }
 
+// GBK¼ÇµÃ×ªUTF8
 void _File::write_excel(OpenXLSX::XLWorksheet& wks, int row, int col, const std::string& data)
 {
-	wks.cell(OpenXLSX::XLCellReference(row, col)).value() = _String::gbk_to_utf8(data);
+	wks.cell(OpenXLSX::XLCellReference(row, col)).value() = data;
 }
 
 std::string _File::read_excel(OpenXLSX::XLWorksheet& wks, int row, int col)
 {
-	std::string data = wks.cell(OpenXLSX::XLCellReference(row, col)).value().get<std::string>();
-	return _String::utf8_to_gbk(data);
+	return wks.cell(OpenXLSX::XLCellReference(row, col)).value().get<std::string>();
 }
 
 void _File::ensure_directory_exists(std::filesystem::path dir)

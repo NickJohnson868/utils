@@ -52,3 +52,59 @@ std::wstring _String::mulity_byte_to_w(std::string data)
 	MultiByteToWideChar(CP_ACP, 0, &data[0], (int)data.size(), &wstr[0], size_needed);
 	return wstr;
 }
+
+bool _String::is_utf8(const std::string& str)
+{
+	int i = 0;
+	while (i < str.size()) {
+		unsigned char c = str[i];
+
+		// 单字节字符（ASCII）
+		if (c <= 0x7F) {
+			i++;
+		}
+		// 两字节字符
+		else if ((c & 0xE0) == 0xC0) {
+			if (i + 1 >= str.size() || (str[i + 1] & 0xC0) != 0x80)
+				return false;
+			i += 2;
+		}
+		// 三字节字符
+		else if ((c & 0xF0) == 0xE0) {
+			if (i + 2 >= str.size() || (str[i + 1] & 0xC0) != 0x80 || (str[i + 2] & 0xC0) != 0x80)
+				return false;
+			i += 3;
+		}
+		// 四字节字符
+		else if ((c & 0xF8) == 0xF0) {
+			if (i + 3 >= str.size() || (str[i + 1] & 0xC0) != 0x80 || (str[i + 2] & 0xC0) != 0x80 || (str[i + 3] & 0xC0) != 0x80)
+				return false;
+			i += 4;
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool _String::is_gbk(const std::string& str)
+{
+	int i = 0;
+	while (i < str.size()) {
+		unsigned char c = str[i];
+
+		// ASCII 字符
+		if (c <= 0x7F) {
+			i++;
+		}
+		// 双字节字符 (GBK)
+		else if ((c >= 0x81 && c <= 0xFE) && (i + 1 < str.size()) && (str[i + 1] >= 0x40 && str[i + 1] <= 0xFE)) {
+			i += 2;
+		}
+		else {
+			return false; // 非 GBK 合法字节
+		}
+	}
+	return true;
+}

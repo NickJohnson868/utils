@@ -1,16 +1,65 @@
+#include <windows.h>
+#include <iostream>
+
 #include "test.h"
 #include "util/util.h"
+#include "nlohmann/json.hpp"
+#include "util/_string.h"
 
-#include <windows.h>
+using namespace std;
 
 namespace Test
 {
 	void run002()
 	{
-		for (int i = 1; i <= 100; i++)
-		{
-			Util::print_progress_bar(i, 100);
-			Sleep(10);
+		nlohmann::json j;
+
+		j["name"] = "John";
+		j["age"] = 30;
+		j["is_student"] = false;
+
+		j["hobbies"] = { "reading", "cycling", "programming" };
+
+		j["address"] = {
+			{"city", "New York"},
+			{"zipcode", "10001"}
+		};
+
+		j.erase("age");
+
+		std::cout << j.dump(4) << std::endl; // 输出 JSON 字符串（缩进 4 空格）
+
+
+
+		std::string json_str = R"({
+				"name": "小红",
+				"age": 25,
+				"is_student": true,
+				"courses": ["Math", "Physics", "Chemistry"]
+			})";
+
+		json_str = _String::gbk_to_utf8(json_str);
+		// 从字符串解析
+		j = nlohmann::json::parse(json_str);
+
+		std::cout << "Name: " << _String::utf8_to_gbk(j["name"]) << "\n";
+		std::cout << "Age: " << j["age"] << "\n";
+		std::cout << "Is Student: " << j["is_student"] << "\n";
+
+		// 遍历数组
+		std::cout << "Courses: ";
+		for (const auto& course : j["courses"]) {
+			std::cout << course << " ";
 		}
+		std::cout << std::endl;
+	}
+
+	void run003()
+	{
+		std::string str = "11中文";
+
+		str = _String::gbk_to_utf8(str);
+
+		cout << _String::is_utf8(str) << endl;
 	}
 }

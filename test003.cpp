@@ -18,7 +18,7 @@ namespace Test
 		return sum;
 	}
 
-	void run003()
+	void run004()
 	{
 		auto res = _Time::time_execution<LL(LL, LL, LL)>(for_mult, 11, 671088637, 17);
 		std::cout << res.duration << " " << res.result << std::endl;
