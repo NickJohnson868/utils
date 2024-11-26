@@ -3,7 +3,9 @@
 #include "_string.h"
 
 #include <windows.h>
-
+#include <sstream>
+#include <random>
+#include <iomanip>
 
 std::string _String::utf8_to_gbk(const std::string& str_utf8)
 {
@@ -107,4 +109,101 @@ bool _String::is_gbk(const std::string& str)
 		}
 	}
 	return true;
+}
+
+std::string _String::url_encode(const std::string& value) 
+{
+	std::ostringstream encoded;
+	for (char c : value) {
+		if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+			encoded << c;
+		}
+		else {
+			encoded << '%' << std::uppercase << std::hex << int((unsigned char)c);
+		}
+	}
+	return encoded.str();
+}
+
+std::string _String::url_decode(const std::string& value)
+{
+	std::ostringstream decoded;
+	for (size_t i = 0; i < value.length(); ++i) {
+		if (value[i] == '%') {
+			int hex_value;
+			std::istringstream(value.substr(i + 1, 2)) >> std::hex >> hex_value;
+			decoded << static_cast<char>(hex_value);
+			i += 2;
+		}
+		else if (value[i] == '+') {
+			decoded << ' ';
+		}
+		else {
+			decoded << value[i];
+		}
+	}
+	return decoded.str();
+}
+
+std::vector<std::string> _String::split_str(const std::string& str, const std::string& delimiter)
+{
+	std::vector<std::string> result;
+	size_t start = 0;
+	size_t end = str.find(delimiter);
+	if (str == "") return result;
+	if (delimiter == "") end = std::string::npos;
+
+	while (end != std::string::npos)
+	{
+		result.push_back(str.substr(start, end - start));
+		start = end + delimiter.length();
+		end = str.find(delimiter, start);
+	}
+
+	result.push_back(str.substr(start));
+
+	return result;
+}
+
+std::string _String::generate_uuid(bool b_lower, bool b_delimiter)
+{
+	// 生成一个随机数引擎
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dis(0, 255); // 生成 0 到 255 的随机数
+
+	// 生成一个 UUID v4 格式的 UUID
+	unsigned char uuid[16];
+	for (int i = 0; i < 16; ++i) {
+		uuid[i] = dis(gen);
+	}
+
+	// 设置 UUID 的版本 (v4)
+	uuid[6] = (uuid[6] & 0x0F) | 0x40;  // 设置版本为 4
+	uuid[8] = (uuid[8] & 0x3F) | 0x80;  // 设置变体为 10xx
+
+	// 将 UUID 转换为字符串
+	std::stringstream ss;
+	ss << std::setfill('0') << std::hex;
+
+	// 拼接 UUID 格式 (8-4-4-4-12)
+	ss << std::setw(2) << (int)uuid[0] << std::setw(2) << (int)uuid[1]
+		<< std::setw(2) << (int)uuid[2] << std::setw(2) << (int)uuid[3];
+	if (b_delimiter) ss << '-';
+	ss << std::setw(2) << (int)uuid[4] << std::setw(2) << (int)uuid[5];
+	if (b_delimiter) ss << '-';
+	ss << std::setw(2) << (int)uuid[6] << std::setw(2) << (int)uuid[7];
+	if (b_delimiter) ss << '-';
+	ss << std::setw(2) << (int)uuid[8] << std::setw(2) << (int)uuid[9];
+	if (b_delimiter) ss << '-';
+	ss << std::setw(2) << (int)uuid[10] << std::setw(2) << (int)uuid[11]
+		<< std::setw(2) << (int)uuid[12] << std::setw(2) << (int)uuid[13]
+		<< std::setw(2) << (int)uuid[14] << std::setw(2) << (int)uuid[15];
+
+	std::string uuid_str = ss.str();
+	if (!b_lower) {
+		to_upper(uuid_str);
+	}
+
+	return uuid_str;
 }

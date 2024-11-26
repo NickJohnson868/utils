@@ -57,6 +57,12 @@
     <ClCompile Include="test003.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="3rd\cpp-base64\base64.cpp">
+      <Filter>源文件\util</Filter>
+    </ClCompile>
+    <ClCompile Include="rename.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\_file.h">
@@ -84,6 +90,12 @@
       <Filter>头文件\util</Filter>
     </ClInclude>
     <ClInclude Include="test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="3rd\cpp-base64\base64.h">
+      <Filter>头文件\util</Filter>
+    </ClInclude>
+    <ClInclude Include="rename.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

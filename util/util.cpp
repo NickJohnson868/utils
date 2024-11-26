@@ -4,6 +4,7 @@
 #include <random>
 #include <windows.h>
 #include <iostream>
+#include <numeric>
 
 void Util::set_cursor_info(bool visible)
 {
@@ -12,27 +13,6 @@ void Util::set_cursor_info(bool visible)
 	cursorInfo.dwSize = 10;  // 光标的大小，范围是1到100
 	cursorInfo.bVisible = visible;  // 光标是否可见
 	SetConsoleCursorInfo(hConsoleOutput, &cursorInfo);
-}
-
-std::string Util::generate_uuid(bool b_upper, bool b_delimiter)
-{
-	char buffer[64] = { 0 };
-	GUID guid;
-	CoCreateGuid(&guid);
-	std::string format = "%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X";
-	if (!b_upper) {
-		format = _String::replace_all<std::string>(format, "X", "x");
-	}
-	if (!b_delimiter) {
-		format = _String::replace_all<std::string>(format, "-", "");
-	}
-	_snprintf_s(buffer, sizeof(buffer),
-		format.data(),
-		guid.Data1, guid.Data2, guid.Data3,
-		guid.Data4[0], guid.Data4[1], guid.Data4[2],
-		guid.Data4[3], guid.Data4[4], guid.Data4[5],
-		guid.Data4[6], guid.Data4[7]);
-	return buffer;
 }
 
 void Util::print_progress_bar(int row, int total)
@@ -53,4 +33,93 @@ void Util::print_progress_bar(int row, int total)
 	if (progress - 100.0 > 0.001) progress = 100;
 	printf("] %.2f%%\r", progress);
 	fflush(stdout);
+}
+
+void Util::color_print(P_R color, const char* const _Format, ...)
+{
+	const char* colorCode = "";
+
+	switch (color) {
+	case _ERROR:
+		colorCode = "\033[31m";  // 红色
+		break;
+	case _WARNING:
+		colorCode = "\033[33m";  // 黄色
+		break;
+	case _INFO:
+		colorCode = "\033[34m";  // 蓝色
+		break;
+	case _SUCCESS:
+		colorCode = "\033[32m";  // 绿色
+		break;
+	}
+
+	va_list args;
+	va_start(args, _Format);
+	printf("%s", colorCode);  // 打印颜色
+	vprintf(_Format, args);   // 打印格式化内容
+	printf("\033[0m");        // 重置颜色
+	va_end(args);
+}
+
+void Util::color_print(const P_P& color, const char* const _Format, ...)
+{
+	unsigned char r = color.R;
+	unsigned char g = color.G;
+	unsigned char b = color.B;
+
+	// 使用 va_list 来处理可变参数
+	va_list args;
+	va_start(args, _Format);
+
+	// 设置前景色为传入的 RGB
+	printf("\033[38;2;%d;%d;%dm", r, g, b);
+	vprintf(_Format, args);   // 打印格式化内容
+	printf("\033[0m");        // 重置颜色
+	va_end(args);
+}
+
+void print_line(char chr, int len)
+{
+	for (int i = 0; i < len; i++)
+		putchar(chr);
+	printf("\n");
+}
+
+void Util::print_table(const Table_DATA& table)
+{
+	std::vector<int> col_width(table.col_name.size(), 0); // 存储每列的最大宽度
+
+	// 计算每列的最大宽度
+	for (size_t i = 0; i < table.col_name.size(); ++i) {
+		col_width[i] = table.col_name[i].length();  // 初始化宽度为列名的长度
+	}
+
+	for (const auto& entry : table.data)
+	{
+		if (entry.first.length() > col_width[0]) col_width[0] = entry.first.length();
+		for (size_t i = 1; i < table.col_name.size(); ++i) {
+			int v_len = entry.second[i - 1].length(); // 获取当前行数据的长度
+			if (v_len > col_width[i]) {
+				col_width[i] = v_len; // 更新列的最大宽度
+			}
+		}
+	}
+
+	// 打印表头
+	print_line('-', std::accumulate(col_width.begin(), col_width.end(), 0) + 3 * (col_width.size()) + 1);
+	for (size_t i = 0; i < table.col_name.size(); ++i)
+		printf("| %-*s ", col_width[i], table.col_name[i].data());
+	printf("|\n");
+	print_line('-', std::accumulate(col_width.begin(), col_width.end(), 0) + 3 * (col_width.size()) + 1);
+
+	// 打印数据行
+	for (const auto& entry : table.data)
+	{
+		Util::color_print(_SUCCESS, "| %-*s ", col_width[0], entry.first.data());
+		for (size_t i = 1; i < table.col_name.size(); ++i)
+			Util::color_print(_SUCCESS, "| %-*s ", col_width[i], entry.second[i - 1].data());
+		Util::color_print(_SUCCESS, "|\n");
+		print_line('-', std::accumulate(col_width.begin(), col_width.end(), 0) + 3 * (col_width.size()) + 1);
+	}
 }

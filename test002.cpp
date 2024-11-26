@@ -5,6 +5,9 @@
 #include "util/util.h"
 #include "nlohmann/json.hpp"
 #include "util/_string.h"
+#include "OpenXLSX.hpp"
+#include "util/_file.h"
+#include "base64.h"
 
 using namespace std;
 
@@ -38,6 +41,9 @@ namespace Test
 				"courses": ["Math", "Physics", "Chemistry"]
 			})";
 
+
+		json_str = base64_encode(json_str);
+		json_str = base64_decode(json_str);
 		json_str = _String::gbk_to_utf8(json_str);
 		// 从字符串解析
 		j = nlohmann::json::parse(json_str);
@@ -57,9 +63,17 @@ namespace Test
 	void run003()
 	{
 		std::string str = "11中文";
-
 		str = _String::gbk_to_utf8(str);
+		cout << (_String::is_utf8(str) ? "UTF8" : "GBK") << endl;
 
-		cout << _String::is_utf8(str) << endl;
+		OpenXLSX::XLDocument doc;
+		doc.create("./test.xlsx");
+		auto work = doc.workbook().worksheet("Sheet1");
+
+		//doc.workbook().addWorksheet("1");
+		//work = doc.workbook().worksheet("1");
+
+		_File::write_excel(work, 1, 1, str);
+		doc.save();
 	}
 }

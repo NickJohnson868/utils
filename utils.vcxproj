@@ -91,7 +91,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>.\3rd\nlohmann\include;.\3rd\OpenXLSX\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\3rd\cpp-base64;.\3rd\nlohmann\include;.\3rd\OpenXLSX\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -108,7 +108,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>.\3rd\nlohmann\include;.\3rd\OpenXLSX\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\3rd\cpp-base64;.\3rd\nlohmann\include;.\3rd\OpenXLSX\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,7 +125,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>.\3rd\nlohmann\include;.\3rd\OpenXLSX\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\3rd\cpp-base64;.\3rd\nlohmann\include;.\3rd\OpenXLSX\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,7 +142,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>.\3rd\nlohmann\include;.\3rd\OpenXLSX\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\3rd\cpp-base64;.\3rd\nlohmann\include;.\3rd\OpenXLSX\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,7 +153,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="3rd\cpp-base64\base64.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="rename.cpp" />
     <ClCompile Include="test001.cpp" />
     <ClCompile Include="test002.cpp" />
     <ClCompile Include="test003.cpp" />
@@ -167,6 +169,8 @@
     <ClCompile Include="util\_time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="3rd\cpp-base64\base64.h" />
+    <ClInclude Include="rename.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="util\_file.h" />
     <ClInclude Include="util\_inject.h" />

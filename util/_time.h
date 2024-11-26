@@ -7,6 +7,23 @@
 #include <type_traits>
 #include <chrono>
 
+enum _TimeType
+{
+	YEAR,
+	MON,
+	DAY,
+	HOUR,
+	MIN,
+	SEC
+};
+
+enum _StampType
+{
+	NANO,
+	MICR,
+	MILL,
+};
+
 typedef struct __FILETIME__
 {
 	FILETIME creationTime, lastWriteTime, lastAccessTime;
@@ -26,7 +43,12 @@ struct FunctionResult<void> {
 class _Time
 {
 public:
-	static std::string get_cur_datetime();
+	static std::string get_cur_datetime(LPCSTR y_m_d = "-", LPCSTR h_m_s = ":");
+	static std::string get_cur_datetime_ms(LPCSTR y_m_d = "-", LPCSTR h_m_s = ":");
+	static std::string get_cur_datetime_us(LPCSTR y_m_d = "-", LPCSTR h_m_s = ":");
+	static std::string get_cur_datetime_ns(LPCSTR y_m_d = "-", LPCSTR h_m_s = ":");
+	static int get_data_or_time(_TimeType type);
+	static long long get_timestamp(_StampType type = MILL);
 
 	static std::string format_filetime(const FILETIME& filetime, LPCSTR y_m_d = "/", LPCSTR h_m_s = ":");
 	static bool get_last_access_time(const std::filesystem::path& filePath, FileTime& lastAccessTime);
