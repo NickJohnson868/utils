@@ -4,11 +4,13 @@
 #ifdef WIN
 #include <windows.h>
 #include <mmsystem.h>
+#define Y_SCALE 0.5
 #if defined(MSVC)
 #pragma comment(lib, "winmm.lib")
 #endif
 #elif defined(LINUX)
 #include <unistd.h>
+#define Y_SCALE 0.4
 #endif
 
 #include <filesystem>
@@ -23,7 +25,9 @@
 #include "util/util.h"
 #include "util/_string.h"
 #include <thread>
+#include <chrono>
 #include "util/_proc.h"
+#include "util/_time.h"
 
 #define CHARACTER "#"
 namespace fs = std::filesystem;
@@ -60,6 +64,7 @@ public:
 		const std::string reset_color = "\033[0m";
 
 		for (int y = 0; y < height; ++y) {
+			ss << "\033[2K"; // 清空行
 			for (int x = 0; x < width; ++x) {
 				int index = (y * width + x) * 4;
 				uint8_t R = rgba_data[index];
@@ -67,7 +72,11 @@ public:
 				uint8_t B = rgba_data[index + 2];
 				uint8_t A = rgba_data[index + 3];
 
-				RGB rgb = Util::rgba_to_rgb({ R, G, B, A }, { 12, 12, 12 });
+#ifdef WIN
+				RGB rgb = Util::rgba_to_rgb({ R, G, B, A }, { 12, 12, 12 }); // Windows终端背景色
+#elif defined(LINUX)
+				RGB rgb = Util::rgba_to_rgb({ R, G, B, A }, {  48, 10, 36 }); // ubuntu
+#endif
 				R = rgb.R;
 				G = rgb.G;
 				B = rgb.B;
@@ -83,13 +92,7 @@ public:
 	}
 
 	void display() {
-#ifdef WIN
-		DWORD written;
-		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-		WriteConsoleA(hConsole, data.data(), strlen(data.data()), &written, NULL);
-#elif defined(LINUX)
-		printf("%s", data.c_str());
-#endif
+		Util::fast_print(data.c_str(), data.size());
 	}
 
 private:
@@ -103,8 +106,9 @@ public:
 	}
 
 	virtual ~CVideoPlayer() {
-		if (std::filesystem::exists(m_audio_path)) {
-			std::filesystem::remove(m_audio_path);
+		if (CFileUtil::is_exists(m_audio_path))
+		{
+			CFileUtil::delete_file(m_audio_path);
 		}
 	}
 
@@ -126,13 +130,13 @@ public:
 		if (type == _VIDEO || type == _GIF) {
 			m_fps = video.get_fps();
 			m_maxFrames = video.get_frames();
-			com_path = CFileUtil::compress_video(videoPath, maxSize, 1.0, 0.5, m_frameWidth, m_frameHeight);
+			com_path = CFileUtil::compress_video(videoPath, maxSize, 1.0, Y_SCALE, m_frameWidth, m_frameHeight);
 			if (type == _VIDEO) m_audio_path = extract_audio(videoPath);
 		}
 		else if (type == _IMAGE) {
 			m_fps = 1;
 			m_maxFrames = 1;
-			com_path = CFileUtil::compress_image(videoPath, maxSize, 1.0, 0.5, m_frameWidth, m_frameHeight);
+			com_path = CFileUtil::compress_image(videoPath, maxSize, 1.0, Y_SCALE, m_frameWidth, m_frameHeight);
 		}
 		else {
 			return;
@@ -194,7 +198,8 @@ private:
 			double frame_time = std::chrono::duration<double>(time2 - time1).count();
 
 			if (i % static_cast<int>(m_fps) == 0) {
-				printf("\033[0mfps: %3.2f,  frame: %d/%d", 1 / frame_time, i, m_maxFrames);
+				std::string info = CStringUtil::format("\033[2K\033[0mfps: %3.2f,  frame: %d/%d", 1 / frame_time, i, m_maxFrames);
+				Util::fast_print(info.c_str(), info.size());
 			}
 
 			// 计算自开始以来的时间
@@ -258,7 +263,6 @@ private:
 
 		// 等待进程完成（如果需要）
 		// WaitForSingleObject(pi.hProcess, INFINITE);
-		Sleep(100);
 #elif defined(LINUX)
 		// 构建ffplay命令
 		std::string command = CStringUtil::format("%sffplay -hide_banner -loglevel quiet -nodisp %s",
@@ -281,9 +285,6 @@ private:
 			args[i] = NULL;
 			// 执行命令
 			execvp(args[0], args);
-			// 如果 execvp 返回，说明执行失败
-			std::cerr << "execvp failed. Error: " << strerror(errno) << std::endl;
-			CFileUtil::write_file("/home/johnson/CLionProjects/utils/cmake-build-release", "1");
 			exit(EXIT_FAILURE);
 		}
 		else {
@@ -292,13 +293,18 @@ private:
 			// 可以选择等待子进程完成
 			// waitpid(pid, NULL, 0);
 		}
-		usleep(100 * 1000);
 #endif
+		CTimeUtil::sleep(100);
 	}
 
 	void exit_sound_thread() {
 		if (ffplay_pid == -1) return;
 		CProcUtil::close_process_by_id(ffplay_pid);
+		CTimeUtil::sleep(10);
+		if (CFileUtil::is_exists(m_audio_path))
+		{
+			CFileUtil::delete_file(m_audio_path);
+		}
 	}
 };
 

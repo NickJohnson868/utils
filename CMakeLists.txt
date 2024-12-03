@@ -44,6 +44,19 @@ target_include_directories(utils PRIVATE
         ${CMAKE_SOURCE_DIR}/src/3rd/OpenXLSX/include
         ${CMAKE_SOURCE_DIR}/src/3rd/OpenXLSX/include/headers)
 
+# 设置构建类型为 Release 或 Debug（默认）
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    # Release 模式下的编译选项
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG -g0")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -DNDEBUG -g0")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -s")
+else()
+    # Debug 模式下的编译选项
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
+    # Debug 模式下不进行优化
+endif()
+
 # 判断架构类型
 if (CMAKE_CXX_FLAGS MATCHES "-m32")
     set(ARCH_DIR "x86")  # 如果编译器标志中包含 -m32，则设置为 x86 架构

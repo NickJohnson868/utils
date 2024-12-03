@@ -20,6 +20,6 @@ class CProcUtil
 {
 public:
 	static std::set<PID_TYPE> get_proc_id_by_name(const PROC_TYPE proc_name);
-	static void close_process_by_name(const PROC_TYPE proc_name);
-	static void close_process_by_id(const PID_TYPE proc_id);
+	static bool close_process_by_name(const PROC_TYPE proc_name);
+	static bool close_process_by_id(const PID_TYPE proc_id);
 };

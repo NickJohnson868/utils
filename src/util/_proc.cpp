@@ -14,26 +14,27 @@
 #include <cstring>
 #endif
 
-void CProcUtil::close_process_by_name(const PROC_TYPE proc_name)
+bool CProcUtil::close_process_by_name(const PROC_TYPE proc_name)
 {
 	std::set<PID_TYPE> id_list = get_proc_id_by_name(proc_name);
 	for (auto& id : id_list)
 	{
-		close_process_by_id(id);
+		return close_process_by_id(id);
 	}
 }
 
-void CProcUtil::close_process_by_id(const PID_TYPE proc_id)
+bool CProcUtil::close_process_by_id(const PID_TYPE proc_id)
 {
 #ifdef WIN
 	HANDLE hProecss = OpenProcess(PROCESS_ALL_ACCESS, FALSE, proc_id); // 打开进程
 	if (hProecss)
 	{
-		TerminateProcess(hProecss, 0); // 关闭进程
+		bool res = TerminateProcess(hProecss, 0); // 关闭进程
 		CloseHandle(hProecss);
+		return res;
 	}
 #elif defined(LINUX)
-	kill(proc_id, SIGTERM);  // 尝试终止进程
+	return kill(proc_id, SIGTERM) == 0;  // 尝试终止进程
 #endif
 }
 

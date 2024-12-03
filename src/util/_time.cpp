@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <iostream>
 #include <filesystem>
+#include <thread>
+#include <chrono>
 
 std::string CTimeUtil::get_cur_datetime(const char* y_m_d, const char* h_m_s) {
 	try {
@@ -147,5 +149,23 @@ long long CTimeUtil::get_timestamp(_StampType type) {
 	catch (const std::exception& e) {
 		Util::color_print(P_ERROR, "Error in get_timestamp: %s\n", e.what());
 		return 0;
+	}
+}
+
+void CTimeUtil::sleep(int time, _StampType type)
+{
+	switch (type)
+	{
+	case NANO:
+		std::this_thread::sleep_for(std::chrono::nanoseconds(time));
+		break;
+	case MICR:
+		std::this_thread::sleep_for(std::chrono::microseconds(time));
+		break;
+	case MILL:
+		std::this_thread::sleep_for(std::chrono::milliseconds(time));
+		break;
+	default:
+		break;
 	}
 }

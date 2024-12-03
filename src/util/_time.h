@@ -46,6 +46,8 @@ public:
 
 	static long long get_timestamp(_StampType type = MILL);
 
+	static void sleep(int time, _StampType type = MILL);
+
 	template<typename Func, typename... Args>
 	static auto time_execution(Func func, Args... args) -> FunctionResult<decltype(func(args...))> {
 		if constexpr (std::is_void_v<decltype(func(args...))>) {

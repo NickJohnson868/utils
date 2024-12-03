@@ -38,7 +38,7 @@
 #define _popen popen
 #define _pclose pclose
 #define sscanf_s sscanf
+#define FILE_SEP "/"
 #define FFMPEG_DIR (CFileUtil::get_project_dir().string() + FILE_SEP + "ffmpeg/").data()
 #define OPEN_MODE "r"
-#define FILE_SEP "/"
 #endif

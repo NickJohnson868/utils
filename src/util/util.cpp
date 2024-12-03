@@ -6,6 +6,12 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef WIN
+#include <windows.h>
+#elif defined(LINUX)
+#include <unistd.h>
+#endif
+
 bool cursor_visible = true;
 
 void Util::set_cursor_visible(bool visible) {
@@ -22,12 +28,8 @@ void Util::print_progress_bar(long long now, long long total, const char* title)
 	constexpr int bar_width = 50;
 
 	if (now == -1) {
-		printf("\r");
-		for (int i = 0; i < bar_width + 7 + 4; ++i) /* 7 是 "[", "]", " ", "%", ">", 和两次 "\r" 的长度 */
-		{
-			printf(" ");
-		}
-		printf("\r");
+		// 清除当前行
+		printf("\033[2K");
 		fflush(stdout);
 		return;
 	}
@@ -97,7 +99,18 @@ void Util::color_print(RGB color, const char* Format, ...) {
 	printf("\033[0m"); /* 重置颜色 */
 	va_end(args);
 }
-
+#ifdef WIN
+DWORD written;
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+#endif
+void Util::fast_print(const char* data, size_t size)
+{
+#ifdef WIN
+	WriteConsoleA(hConsole, data, size, &written, NULL);
+#elif defined(LINUX)
+	ssize_t written = write(STDOUT_FILENO, data, size);
+#endif
+}
 
 void print_line(const char chr, const int len) {
 	for (int i = 0; i < len; i++)

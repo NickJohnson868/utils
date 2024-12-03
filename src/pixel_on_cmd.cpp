@@ -73,9 +73,6 @@ bool is_video(const string& extension)
 
 void play_video(std::filesystem::path file, int maxSize = 192, int font = 16)
 {
-#ifdef LINUX
-	file = CStringUtil::replace_all<string>(file.string(), "\\", "/");
-#endif
     video = new CVideoPlayer;
     _Type t;
     if (is_image(file.extension().string())) t = _IMAGE;
@@ -87,6 +84,7 @@ void play_video(std::filesystem::path file, int maxSize = 192, int font = 16)
     printf("\033c");
     reset_screen(maxSize, font);
     video->display();
+    close_player();
 }
 
 namespace PixelOnCmd

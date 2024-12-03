@@ -40,4 +40,6 @@ public:
 	static bool get_cmd_output(const std::string& command, std::string& output);
 
 	static RGB rgba_to_rgb(const RGBA& rgba, const RGB& bk);
+
+	static void fast_print(const char* data, size_t size);
 };
