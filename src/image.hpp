@@ -300,10 +300,10 @@ private:
 	void exit_sound_thread() {
 		if (ffplay_pid == -1) return;
 		CProcUtil::close_process_by_id(ffplay_pid);
-		CTimeUtil::sleep(10);
-		if (CFileUtil::is_exists(m_audio_path))
-		{
-			CFileUtil::delete_file(m_audio_path);
+		if (CFileUtil::is_exists(m_audio_path)) {
+			while (!CFileUtil::delete_file(m_audio_path)) {
+				CTimeUtil::sleep(100);
+			}
 		}
 	}
 };
