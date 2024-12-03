@@ -15,7 +15,7 @@ std::string CTimeUtil::get_cur_datetime(const char* y_m_d, const char* h_m_s) {
 		std::tm local_tm = {};
 #ifdef WIN
 		localtime_s(&local_tm, &time_t_now);
-#elif LINUX
+#elif defined(LINUX)
 		localtime_r(&time_t_now, &local_tm);
 #endif
 
@@ -97,7 +97,7 @@ int CTimeUtil::get_data_or_time(_TimeType type) {
 		std::tm local_tm = {};
 #ifdef WIN
 		localtime_s(&local_tm, &time_t_now);
-#elif LINUX
+#elif defined(LINUX)
 		localtime_r(&time_t_now, &local_tm);
 #endif
 

@@ -7,7 +7,7 @@
 #if defined(MSVC)
 #pragma comment(lib, "winmm.lib")
 #endif
-#elif LINUX
+#elif defined(LINUX)
 #include <unistd.h>
 #endif
 
@@ -27,34 +27,30 @@
 
 #define CHARACTER "#"
 namespace fs = std::filesystem;
+
 void reset_screen(int max_size = 192, int font_size = 8);
+
 int enable_vt_mode();
 
-struct Pixel
-{
+struct Pixel {
 	unsigned char R, G, B;
 };
 
-enum _Type
-{
+enum _Type {
 	_IMAGE,
 	_VIDEO,
 	_GIF
 };
 
-class CFrame
-{
+class CFrame {
 public:
-	CFrame()
-	{
+	CFrame() {
 	}
 
-	virtual ~CFrame()
-	{
+	virtual ~CFrame() {
 	}
 
-	void read_rgba(std::vector<uint8_t>& rgba_data, int width, int height)
-	{
+	void read_rgba(std::vector<uint8_t>& rgba_data, int width, int height) {
 		std::ostringstream ss;
 		ss.str().reserve(width * height);
 		ss << "\033[H";
@@ -63,10 +59,8 @@ public:
 		const std::string color_suffix = "m";
 		const std::string reset_color = "\033[0m";
 
-		for (int y = 0; y < height; ++y)
-		{
-			for (int x = 0; x < width; ++x)
-			{
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
 				int index = (y * width + x) * 4;
 				uint8_t R = rgba_data[index];
 				uint8_t G = rgba_data[index + 1];
@@ -88,13 +82,12 @@ public:
 		data = ss.str();
 	}
 
-	void display()
-	{
+	void display() {
 #ifdef WIN
 		DWORD written;
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 		WriteConsoleA(hConsole, data.data(), strlen(data.data()), &written, NULL);
-#elif LINUX
+#elif defined(LINUX)
 		printf("%s", data.c_str());
 #endif
 	}
@@ -104,25 +97,19 @@ private:
 	int m_width, m_height;
 };
 
-class CVideoPlayer
-{
+class CVideoPlayer {
 public:
-	CVideoPlayer() : m_frameWidth(0), m_frameHeight(0), m_fps(0)
-	{
-
+	CVideoPlayer() : m_frameWidth(0), m_frameHeight(0), m_fps(0) {
 	}
 
-	virtual ~CVideoPlayer()
-	{
-		if (std::filesystem::exists(m_audio_path))
-		{
+	virtual ~CVideoPlayer() {
+		if (std::filesystem::exists(m_audio_path)) {
 			std::filesystem::remove(m_audio_path);
 		}
 	}
 
 
-	void display()
-	{
+	void display() {
 		bool cursor_visible = Util::is_cursor_visible();
 		Util::set_cursor_visible(false);
 		play_frame();
@@ -130,33 +117,30 @@ public:
 	}
 
 
-	void read_video(const std::filesystem::path& videoPath, _Type type, int maxSize = 192)
-	{
+	void read_video(const std::filesystem::path& videoPath, _Type type, int maxSize = 192) {
 		CVideoInfo video(videoPath);
 		m_frameWidth = video.get_width();
 		m_frameHeight = video.get_height();
 		std::cout << "压缩文件..." << std::endl;
 		fs::path com_path;
-		if (type == _VIDEO || type == _GIF)
-		{
+		if (type == _VIDEO || type == _GIF) {
 			m_fps = video.get_fps();
 			m_maxFrames = video.get_frames();
 			com_path = CFileUtil::compress_video(videoPath, maxSize, 1.0, 0.5, m_frameWidth, m_frameHeight);
 			if (type == _VIDEO) m_audio_path = extract_audio(videoPath);
 		}
-		else if (type == _IMAGE)
-		{
+		else if (type == _IMAGE) {
 			m_fps = 1;
 			m_maxFrames = 1;
 			com_path = CFileUtil::compress_image(videoPath, maxSize, 1.0, 0.5, m_frameWidth, m_frameHeight);
 		}
-		else
-		{
+		else {
 			return;
 		}
 
 		int frameCount = 0;
-		std::string command = CStringUtil::format("%sffmpeg -nostats -loglevel error -hide_banner -i \"%s\" -f image2pipe -pix_fmt rgba -vcodec rawvideo -vsync 0 -", 
+		std::string command = CStringUtil::format(
+			"%sffmpeg -nostats -loglevel error -hide_banner -i \"%s\" -f image2pipe -pix_fmt rgba -vcodec rawvideo -vsync 0 -",
 			FFMPEG_DIR, com_path.string().data());
 
 		FILE* pipe = _popen(command.c_str(), OPEN_MODE);
@@ -166,8 +150,7 @@ public:
 		std::cout << "读取视频帧数据..." << std::endl;
 		bool cursor_visible = Util::is_cursor_visible();
 		Util::set_cursor_visible(false);
-		while (frameCount < m_maxFrames)
-		{
+		while (frameCount < m_maxFrames) {
 			Util::print_progress_bar(frameCount, m_maxFrames);
 			CFrame image;
 
@@ -195,15 +178,14 @@ private:
 	std::filesystem::path m_audio_path;
 	PID_TYPE ffplay_pid;
 
-	void play_frame()
-	{
+	void play_frame() {
 		using clock = std::chrono::high_resolution_clock;
 		auto cpuFrequency = 1.0 / clock::period::den; // 获取高精度计时器的频率
 		auto start_time = clock::now(); // 获取开始时间
 
 		create_sound_thread();
-		for (int i = 0; i < m_maxFrames;)
-		{
+		if (ffplay_pid == -1) return;
+		for (int i = 0; i < m_maxFrames;) {
 			auto time1 = clock::now(); // 获取当前时间
 			m_frames[i].display(); // 显示当前帧
 			auto time2 = clock::now(); // 获取显示完后的时间
@@ -211,8 +193,7 @@ private:
 			// 计算当前帧时间
 			double frame_time = std::chrono::duration<double>(time2 - time1).count();
 
-			if (i % static_cast<int>(m_fps) == 0)
-			{
+			if (i % static_cast<int>(m_fps) == 0) {
 				printf("\033[0mfps: %3.2f,  frame: %d/%d", 1 / frame_time, i, m_maxFrames);
 			}
 
@@ -225,14 +206,13 @@ private:
 	}
 
 
-	std::filesystem::path extract_audio(const std::filesystem::path& video_path)
-	{
+	std::filesystem::path extract_audio(const std::filesystem::path& video_path) {
 		std::string uuid = video_path.parent_path().string() + FILE_SEP + CStringUtil::generate_uuid() + ".mp3";
-		std::string command = CStringUtil::format("%sffmpeg -nostats -loglevel error -hide_banner -i %s -q:a 0 -map a %s",
+		std::string command = CStringUtil::format(
+			"%sffmpeg -nostats -loglevel error -hide_banner -i %s -q:a 0 -map a %s",
 			FFMPEG_DIR, video_path.string().data(), uuid.data());
 		int result = system(command.c_str());
-		if (result != 0)
-		{
+		if (result != 0) {
 			std::cerr << "Failed to execute command: " << command << std::endl;
 			return "";
 		}
@@ -245,7 +225,7 @@ private:
 
 #ifdef WIN
 		// 构建ffplay命令
-		std::string command = CStringUtil::format("%sffplay.exe -hide_banner -loglevel quiet -nodisp %s", 
+		std::string command = CStringUtil::format("%sffplay.exe -hide_banner -loglevel quiet -nodisp %s",
 			FFMPEG_DIR, m_audio_path.string().data());
 
 		// 使用CreateProcess启动ffplay
@@ -283,40 +263,46 @@ private:
 		// 构建ffplay命令
 		std::string command = CStringUtil::format("%sffplay -hide_banner -loglevel quiet -nodisp %s",
 			FFMPEG_DIR, m_audio_path.string().data());
-
-		std::cout << command << std::endl;
-
-		// 使用fork和exec启动ffplay
-		pid_t pid = fork(); // 创建子进程
+		pid_t pid = fork();
 
 		if (pid < 0) {
-			std::cerr << "fork failed" << std::endl;
+			std::cerr << "fork failed. Error: " << strerror(errno) << std::endl;
 			return;
 		}
+		else if (pid == 0) {
+			char* args[10];
+			int i = 0;
 
-		if (pid == 0) { // 子进程
-			// 使用execvp启动ffplay
-			char* args[] = { const_cast<char*>(FFMPEG_DIR), "ffplay", "-hide_banner", "-loglevel", "quiet", const_cast<char*>(m_audio_path.string().c_str()), nullptr };
-
-			if (execvp(args[0], args) == -1) {
-				std::cerr << "execvp failed. Error: " << strerror(errno) << std::endl;
-				exit(1);  // 进程执行失败，退出子进程
+			char* token = strtok(const_cast<char*>(command.c_str()), " ");
+			while (token != NULL && i < 9) {
+				args[i++] = token;
+				token = strtok(NULL, " ");
 			}
+			args[i] = NULL;
+			// 执行命令
+			execvp(args[0], args);
+			// 如果 execvp 返回，说明执行失败
+			std::cerr << "execvp failed. Error: " << strerror(errno) << std::endl;
+			CFileUtil::write_file("/home/johnson/CLionProjects/utils/cmake-build-release", "1");
+			exit(EXIT_FAILURE);
 		}
-		else { // 父进程
-			ffplay_pid = pid; // 获取子进程PID
+		else {
+			// 父进程，记录子进程的 PID
+			ffplay_pid = pid;
+			// 可以选择等待子进程完成
+			// waitpid(pid, NULL, 0);
 		}
+		usleep(100 * 1000);
 #endif
 	}
 
-	void exit_sound_thread()
-	{
+	void exit_sound_thread() {
+		if (ffplay_pid == -1) return;
 		CProcUtil::close_process_by_id(ffplay_pid);
 	}
 };
 
-int enable_vt_mode()
-{
+int enable_vt_mode() {
 #ifdef WIN
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hOut == INVALID_HANDLE_VALUE)
@@ -345,8 +331,7 @@ int enable_vt_mode()
 }
 
 
-void reset_screen(int max_size, int font_size)
-{
+void reset_screen(int max_size, int font_size) {
 #ifdef WIN
 	HANDLE hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsoleOutput == INVALID_HANDLE_VALUE)

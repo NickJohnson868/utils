@@ -8,7 +8,7 @@
 
 #ifdef WIN
 #include <windows.h>
-#elif LINUX
+#elif defined(LINUX)
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/file.h>   // for flock
@@ -148,7 +148,7 @@ bool CFileUtil::is_hidden(const fs::path& file)
         return false;
     }
     return fileAttributes & FILE_ATTRIBUTE_HIDDEN;
-#elif LINUX
+#elif defined(LINUX)
     std::string fileName = file.filename().string();
     return !fileName.empty() && fileName[0] == '.';
 #endif
@@ -215,7 +215,7 @@ fs::path CFileUtil::get_exe_path()
 #ifdef WIN
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
-#elif LINUX
+#elif defined(LINUX)
     char buffer[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
     if (len == -1) {
@@ -295,7 +295,7 @@ bool CFileUtil::is_file_in_use(const std::filesystem::path& filePath)
 
     CloseHandle(hFile); // 文件未被使用，可以正常关闭
     return false;
-#elif LINUX
+#elif defined(LINUX)
     int fd = open(filePath.c_str(), O_RDONLY); // 打开文件（只读）
     if (fd == -1) {
         perror("Failed to open file");

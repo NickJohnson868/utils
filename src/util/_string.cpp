@@ -9,7 +9,7 @@
 
 #ifdef WIN
 #include <windows.h>
-#elif LINUX
+#elif defined(LINUX)
 #include <iconv.h>
 #define CP_TO(x) x==CP_GBK?("GBK"):(x==CP_UTF8?"UTF-8":"")
 #endif
@@ -38,7 +38,7 @@ std::string CStringUtil::utf8_to_gbk(const std::string& str_utf8)
 	WideCharToMultiByte(CP_GBK, 0, wideStr.c_str(), wideCharSize, &gbkStr[0], gbkSize, nullptr, nullptr);
 
 	return gbkStr;
-#elif LINUX
+#elif defined(LINUX)
 	// 创建 iconv 转换描述符
 	iconv_t cd = iconv_open("GBK", "UTF-8");
 	if (cd == (iconv_t)-1) {
@@ -92,7 +92,7 @@ std::string CStringUtil::gbk_to_utf8(const std::string& str_gbk)
 	WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), wideCharSize, &utf8Str[0], utf8Size, nullptr, nullptr);
 
 	return utf8Str;
-#elif LINUX
+#elif defined(LINUX)
 	// 创建 iconv 转换描述符
 	iconv_t cd = iconv_open("UTF-8", "GBK");
 	if (cd == (iconv_t)-1) {
@@ -146,7 +146,7 @@ std::string CStringUtil::wstring_to_multibyte(const std::wstring& wstr, UINT cod
 	);
 
 	return result;
-#elif LINUX
+#elif defined(LINUX)
 	// 创建 iconv 转换描述符
 	iconv_t cd = iconv_open(CP_TO(codePage), "WCHAR_T");
 	if (cd == (iconv_t)-1) {
@@ -194,7 +194,7 @@ std::wstring CStringUtil::multibyte_to_wstring(const std::string& str, UINT code
 	);
 
 	return result;
-#elif LINUX
+#elif defined(LINUX)
 	// 创建 iconv 转换描述符
 	iconv_t cd = iconv_open("WCHAR_T", CP_TO(codePage));
 	if (cd == (iconv_t)-1) {

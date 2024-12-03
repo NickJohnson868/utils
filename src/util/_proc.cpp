@@ -7,7 +7,7 @@
 #ifdef WIN
 #include <windows.h>
 #include <TlHelp32.h>
-#elif LINUX
+#elif defined(LINUX)
 #include <dirent.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -32,7 +32,7 @@ void CProcUtil::close_process_by_id(const PID_TYPE proc_id)
 		TerminateProcess(hProecss, 0); // 关闭进程
 		CloseHandle(hProecss);
 	}
-#elif LINUX
+#elif defined(LINUX)
 	kill(proc_id, SIGTERM);  // 尝试终止进程
 #endif
 }
@@ -62,7 +62,7 @@ std::set<PID_TYPE> CProcUtil::get_proc_id_by_name(const PROC_TYPE proc_name)
 		CloseHandle(hSnapshot);
 	}
 	return id_list;
-#elif LINUX
+#elif defined(LINUX)
 	DIR* dir = opendir("/proc");
 	if (dir == nullptr) {
 		Util::color_print(P_ERROR, "Failed to open /proc");

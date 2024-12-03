@@ -6,7 +6,7 @@
 
 #ifdef WIN
 #include <windows.h>
-#elif LINUX
+#elif defined(LINUX)
 #include <csignal>
 #include <unistd.h>
 #endif
@@ -39,7 +39,7 @@ BOOL WINAPI signal_handler(DWORD dwCtrlType)
     }
     return false;
 }
-#elif LINUX
+#elif defined(LINUX)
 void signal_handler(int signal) {
 	if (signal == SIGINT || signal == SIGTERM) {
 		printf("\033c");		// ANSI 清屏指令
@@ -105,7 +105,7 @@ namespace PixelOnCmd
             std::cerr << "无法设置控制处理器: " << GetLastError() << std::endl;
             return;
         }
-#elif LINUX
+#elif defined(LINUX)
 		// 设置信号处理函数
 		signal(SIGINT, signal_handler);
 		signal(SIGTERM, signal_handler);
