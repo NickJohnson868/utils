@@ -1,6 +1,8 @@
 #pragma once
 
-#ifdef _WIN32
+#include "macro.h"
+
+#ifdef WIN
 
 #include <windows.h>
 #include <string>

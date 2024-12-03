@@ -13,9 +13,9 @@ std::string CTimeUtil::get_cur_datetime(const char* y_m_d, const char* h_m_s) {
 		std::time_t time_t_now = std::chrono::system_clock::to_time_t(now);
 
 		std::tm local_tm = {};
-#ifdef _WIN32
+#ifdef WIN
 		localtime_s(&local_tm, &time_t_now);
-#elif __linux__
+#elif LINUX
 		localtime_r(&time_t_now, &local_tm);
 #endif
 
@@ -95,9 +95,9 @@ int CTimeUtil::get_data_or_time(_TimeType type) {
 		std::time_t time_t_now = std::chrono::system_clock::to_time_t(now);
 
 		std::tm local_tm = {};
-#ifdef _WIN32
+#ifdef WIN
 		localtime_s(&local_tm, &time_t_now);
-#elif __linux__
+#elif LINUX
 		localtime_r(&time_t_now, &local_tm);
 #endif
 

@@ -1,4 +1,3 @@
-#include "macro.h"
 #include "util.h"
 
 #include <cstdarg>

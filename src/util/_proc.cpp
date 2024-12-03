@@ -4,11 +4,10 @@
 
 #include <iostream>
 
-#ifdef _WIN32
+#ifdef WIN
 #include <windows.h>
 #include <TlHelp32.h>
-#define UNICODE
-#elif __linux__
+#elif LINUX
 #include <dirent.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -20,23 +19,28 @@ void CProcUtil::close_process_by_name(const PROC_TYPE proc_name)
 	std::set<PID_TYPE> id_list = get_proc_id_by_name(proc_name);
 	for (auto& id : id_list)
 	{
-#ifdef _WIN32
-		HANDLE hProecss = OpenProcess(PROCESS_ALL_ACCESS, FALSE, id); // ¥Úø™Ω¯≥Ã
-		if (hProecss)
-		{
-			TerminateProcess(hProecss, 0); // πÿ±’Ω¯≥Ã
-			CloseHandle(hProecss);
-		}
-#elif __linux__
-		kill(id, SIGTERM);  // ≥¢ ‘÷’÷πΩ¯≥Ã
-#endif
+		close_process_by_id(id);
 	}
+}
+
+void CProcUtil::close_process_by_id(const PID_TYPE proc_id)
+{
+#ifdef WIN
+	HANDLE hProecss = OpenProcess(PROCESS_ALL_ACCESS, FALSE, proc_id); // ÊâìÂºÄËøõÁ®ã
+	if (hProecss)
+	{
+		TerminateProcess(hProecss, 0); // ÂÖ≥Èó≠ËøõÁ®ã
+		CloseHandle(hProecss);
+	}
+#elif LINUX
+	kill(proc_id, SIGTERM);  // Â∞ùËØïÁªàÊ≠¢ËøõÁ®ã
+#endif
 }
 
 std::set<PID_TYPE> CProcUtil::get_proc_id_by_name(const PROC_TYPE proc_name)
 {
 	std::set<PID_TYPE> id_list;
-#ifdef _WIN32
+#ifdef MSVC
 	PROCESSENTRY32 pe = { sizeof(PROCESSENTRY32) };
 	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
 	if (hSnapshot != INVALID_HANDLE_VALUE)
@@ -45,9 +49,9 @@ std::set<PID_TYPE> CProcUtil::get_proc_id_by_name(const PROC_TYPE proc_name)
 		{
 			while (Process32Next(hSnapshot, &pe))
 			{
-#ifdef __MINGW32__
+#ifdef MINGW
 				if (CStringUtil::compare_ignore_case<std::string>(proc_name, pe.szExeFile))
-#else
+#elif defined(MSVC)
 				if (CStringUtil::compare_ignore_case<std::wstring>(proc_name, pe.szExeFile))
 #endif
 				{
@@ -58,7 +62,7 @@ std::set<PID_TYPE> CProcUtil::get_proc_id_by_name(const PROC_TYPE proc_name)
 		CloseHandle(hSnapshot);
 	}
 	return id_list;
-#elif __linux__
+#elif LINUX
 	DIR* dir = opendir("/proc");
 	if (dir == nullptr) {
 		Util::color_print(P_ERROR, "Failed to open /proc");
@@ -67,18 +71,18 @@ std::set<PID_TYPE> CProcUtil::get_proc_id_by_name(const PROC_TYPE proc_name)
 
 	struct dirent* entry;
 	while ((entry = readdir(dir)) != nullptr) {
-		// »∑±£ «“ª∏ˆΩ¯≥Ãƒø¬º£®“‘ ˝◊÷√¸√˚£©
+		// Á°Æ‰øùÊòØ‰∏Ä‰∏™ËøõÁ®ãÁõÆÂΩïÔºà‰ª•Êï∞Â≠óÂëΩÂêçÔºâ
 		if (isdigit(entry->d_name[0])) {
 			std::string pid_dir = std::string("/proc/") + entry->d_name + "/comm";
 			FILE* file = fopen(pid_dir.c_str(), "r");
 			if (file) {
 				char buf[256];
 				if (fgets(buf, sizeof(buf), file)) {
-					// “∆≥˝ªª––∑˚
+					// ÁßªÈô§Êç¢Ë°åÁ¨¶
 					buf[strcspn(buf, "\n")] = 0;
 					std::string name = CStringUtil::trim(buf);
 					if (proc_name == name) {
-						id_list.insert(atoi(entry->d_name));  // ªÒ»°Ω¯≥ÃID
+						id_list.insert(atoi(entry->d_name));  // Ëé∑ÂèñËøõÁ®ãID
 					}
 				}
 				fclose(file);

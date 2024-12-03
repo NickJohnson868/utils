@@ -1,5 +1,7 @@
 #pragma once
 
+#include "macro.h"
+
 #include <filesystem>
 #include <set>
 
@@ -33,6 +35,8 @@ public:
 	static bool is_dir(const fs::path& f);
 
 	static fs::path get_exe_path();
+
+	static fs::path get_project_dir();
 
 	static fs::path get_exe_dir();
 

@@ -1,37 +1,32 @@
-#include "macro.h"
 #include "_file.h"
 #include "util.h"
 #include "_string.h"
 #include "_math.h"
 
-
 #include <fstream>
-#include <sstream>
 #include <iostream>
 
-#ifdef _WIN32
+#ifdef WIN
 #include <windows.h>
-#elif __linux__
+#elif LINUX
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/file.h>   // for flock
 #include <errno.h>      // for errno and EWOULDBLOCK
 #endif
 
-#ifdef _WIN32
-#ifndef __MINGW32__ // MINGW环境不适用
-#ifdef _M_X64
+#ifdef MSVC
+#ifdef WIN64
 #ifdef _DEBUG
 #pragma comment(lib, "x64/OpenXLSXd.lib")
 #else
 #pragma comment(lib, "x64/OpenXLSX.lib")
 #endif
-#elif defined(_M_IX86)
+#elif defined(WIN32)
 #ifdef _DEBUG
 #pragma comment(lib, "x86/OpenXLSXd.lib")
 #else
 #pragma comment(lib, "x86/OpenXLSX.lib")
-#endif
 #endif
 #endif
 #endif
@@ -41,17 +36,21 @@ void convert_progress(const std::string& command, long long total_duration);
 std::string compress_command();
 
 /* 内存中保持GBK编码 */
-bool CFileUtil::read_file(const fs::path& path, std::string& data) {
-    try {
+bool CFileUtil::read_file(const fs::path& path, std::string& data)
+{
+    try
+    {
         std::ifstream file(path, std::ios::binary);
-        if (!file) {
+        if (!file)
+        {
             Util::color_print(P_ERROR, "Failed to open file: %s\n", path.c_str());
             return false;
         }
         data.assign((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
         return true;
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& e)
+    {
         Util::color_print(P_ERROR, "Exception in read_file: %s\n", e.what());
         return false;
     }
@@ -59,13 +58,16 @@ bool CFileUtil::read_file(const fs::path& path, std::string& data) {
 
 
 /* 推荐写入UTF8 */
-bool CFileUtil::write_file(const fs::path& path, const std::string& data, const bool& append) {
-    try {
+bool CFileUtil::write_file(const fs::path& path, const std::string& data, const bool& append)
+{
+    try
+    {
         auto flag = std::ios_base::binary;
         if (append)
             flag |= std::ios_base::app;
         std::ofstream file(path, flag);
-        if (!file) {
+        if (!file)
+        {
             Util::color_print(P_ERROR, "Failed to open file for writing: %s\n", path.c_str());
             return false;
         }
@@ -73,59 +75,72 @@ bool CFileUtil::write_file(const fs::path& path, const std::string& data, const 
         file << data;
         return true;
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& e)
+    {
         Util::color_print(P_ERROR, "Exception in write_file: %s\n", e.what());
         return false;
     }
 }
 
 
-bool CFileUtil::clear_file(const fs::path& path) {
-    try {
+bool CFileUtil::clear_file(const fs::path& path)
+{
+    try
+    {
         std::ofstream file(path, std::ios::trunc);
         return file.good();
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& e)
+    {
         Util::color_print(P_ERROR, "Exception in clear_file: %s\n", e.what());
         return false;
     }
 }
 
 
-bool CFileUtil::move_file(const fs::path& source_path, const fs::path& dest_path) {
+bool CFileUtil::move_file(const fs::path& source_path, const fs::path& dest_path)
+{
     return rename_file(source_path, dest_path);
 }
 
 
-bool CFileUtil::rename_file(const fs::path& old_name, const fs::path& new_name) {
-    try {
-        if (fs::exists(new_name)) {
+bool CFileUtil::rename_file(const fs::path& old_name, const fs::path& new_name)
+{
+    try
+    {
+        if (fs::exists(new_name))
+        {
             Util::color_print(P_ERROR, "Destination file already exists: %s\n", new_name.string().c_str());
             return false;
         }
         fs::rename(old_name, new_name);
         return true;
     }
-    catch (const fs::filesystem_error& e) {
+    catch (const fs::filesystem_error& e)
+    {
         Util::color_print(P_ERROR, "Exception in rename_file: %s\n", e.what());
         return false;
     }
 }
 
 
-bool CFileUtil::delete_file(const fs::path& file_path) {
-    try {
+bool CFileUtil::delete_file(const fs::path& file_path)
+{
+    try
+    {
         fs::remove(file_path);
         return true;
     }
-    catch (const fs::filesystem_error& e) {
+    catch (const fs::filesystem_error& e)
+    {
         Util::color_print(P_ERROR, "Exception in delete_file: %s\n", e.what());
         return false;
     }
 }
 
-bool CFileUtil::is_hidden(const fs::path& file) {
-#ifdef _WIN32
+bool CFileUtil::is_hidden(const fs::path& file)
+{
+#ifdef WIN
     DWORD fileAttributes = GetFileAttributesA(file.string().c_str());
     if (fileAttributes == INVALID_FILE_ATTRIBUTES)
     {
@@ -133,7 +148,7 @@ bool CFileUtil::is_hidden(const fs::path& file) {
         return false;
     }
     return fileAttributes & FILE_ATTRIBUTE_HIDDEN;
-#elif __linux__
+#elif LINUX
     std::string fileName = file.filename().string();
     return !fileName.empty() && fileName[0] == '.';
 #endif
@@ -166,34 +181,41 @@ std::string CFileUtil::read_excel(OpenXLSX::XLWorksheet& wks, int row, int col)
 }
 
 
-void CFileUtil::ensure_directory_exists(const fs::path& dir) {
-    try {
+void CFileUtil::ensure_directory_exists(const fs::path& dir)
+{
+    try
+    {
         if (!fs::exists(dir))
             fs::create_directories(dir);
     }
-    catch (const fs::filesystem_error& e) {
+    catch (const fs::filesystem_error& e)
+    {
         Util::color_print(P_ERROR, "Exception in ensure_directory_exists: %s\n", e.what());
     }
 }
 
 
-bool CFileUtil::is_exists(const fs::path& f) {
+bool CFileUtil::is_exists(const fs::path& f)
+{
     return fs::exists(f);
 }
 
-bool CFileUtil::is_file(const fs::path& f) {
+bool CFileUtil::is_file(const fs::path& f)
+{
     return fs::is_regular_file(f);
 }
 
-bool CFileUtil::is_dir(const fs::path& f) {
+bool CFileUtil::is_dir(const fs::path& f)
+{
     return fs::is_directory(f);
 }
 
-fs::path CFileUtil::get_exe_path() {
-#ifdef _WIN32
+fs::path CFileUtil::get_exe_path()
+{
+#ifdef WIN
     char buffer[MAX_PATH];
     GetModuleFileNameA(NULL, buffer, MAX_PATH);
-#elif __linux__
+#elif LINUX
     char buffer[PATH_MAX];
     ssize_t len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
     if (len == -1) {
@@ -205,29 +227,48 @@ fs::path CFileUtil::get_exe_path() {
     return std::filesystem::path(buffer);
 }
 
-fs::path CFileUtil::get_exe_dir() {
+fs::path CFileUtil::get_project_dir()
+{
+#ifdef MINGW
+    std::string p = PROJECT_ROOT_PATH;
+    return CStringUtil::replace_all<std::string>(p, "/", "\\");
+#elif defined(LINUX)
+    std::string p = PROJECT_ROOT_PATH;
+    return CStringUtil::replace_all<std::string>(p, "\\", "/");
+#elif defined(MSVC)
+    return fs::current_path();
+#endif
+}
+
+fs::path CFileUtil::get_exe_dir()
+{
     return CFileUtil::get_exe_path().parent_path();
 }
 
 
-fs::path CFileUtil::get_parent_dir(const fs::path& file) {
+fs::path CFileUtil::get_parent_dir(const fs::path& file)
+{
     return file.parent_path();
 }
 
 
-fs::path CFileUtil::relative_path(const fs::path& p1, const fs::path& p2) {
-    try {
+fs::path CFileUtil::relative_path(const fs::path& p1, const fs::path& p2)
+{
+    try
+    {
         return p1.lexically_relative(p2);
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& e)
+    {
         Util::color_print(P_ERROR, "Exception in relative_path: %s\n", e.what());
         return fs::path();
     }
 }
 
 
-bool CFileUtil::is_file_in_use(const std::filesystem::path& filePath) {
-#ifdef _WIN32
+bool CFileUtil::is_file_in_use(const std::filesystem::path& filePath)
+{
+#ifdef WIN
     HANDLE hFile = CreateFileW(
         filePath.wstring().data(),
         GENERIC_READ,
@@ -238,12 +279,15 @@ bool CFileUtil::is_file_in_use(const std::filesystem::path& filePath) {
         NULL
     );
 
-    if (hFile == INVALID_HANDLE_VALUE) {
+    if (hFile == INVALID_HANDLE_VALUE)
+    {
         DWORD error = GetLastError();
-        if (error == ERROR_SHARING_VIOLATION) {
+        if (error == ERROR_SHARING_VIOLATION)
+        {
             return true; // 文件正在被使用
         }
-        else {
+        else
+        {
             Util::color_print(P_ERROR, "Error: %lu\n", error);
         }
         return false;
@@ -251,7 +295,7 @@ bool CFileUtil::is_file_in_use(const std::filesystem::path& filePath) {
 
     CloseHandle(hFile); // 文件未被使用，可以正常关闭
     return false;
-#elif __linux__
+#elif LINUX
     int fd = open(filePath.c_str(), O_RDONLY); // 打开文件（只读）
     if (fd == -1) {
         perror("Failed to open file");
@@ -277,7 +321,8 @@ bool CFileUtil::is_file_in_use(const std::filesystem::path& filePath) {
 }
 
 
-fs::path CFileUtil::change_extension(const fs::path& file, const std::string& new_extension) {
+fs::path CFileUtil::change_extension(const fs::path& file, const std::string& new_extension)
+{
     /* 替换扩展名 */
     fs::path new_file = file;
     new_file.replace_extension(new_extension);
@@ -285,18 +330,23 @@ fs::path CFileUtil::change_extension(const fs::path& file, const std::string& ne
 }
 
 
-bool CFileUtil::get_dir_files(const fs::path& dir, std::set<fs::path>& files, bool b_dir, bool b_recu) {
-    auto process_entry = [&](const fs::directory_entry& entry) {
+bool CFileUtil::get_dir_files(const fs::path& dir, std::set<fs::path>& files, bool b_dir, bool b_recu)
+{
+    auto process_entry = [&](const fs::directory_entry& entry)
+    {
         bool is_file = fs::is_regular_file(entry);
         bool is_directory = fs::is_directory(entry);
 
-        if ((b_dir && is_directory) || (!b_dir && is_file)) {
+        if ((b_dir && is_directory) || (!b_dir && is_file))
+        {
             files.insert(entry.path());
         }
-        };
+    };
 
-    try {
-        if (!fs::exists(dir) || !fs::is_directory(dir)) {
+    try
+    {
+        if (!fs::exists(dir) || !fs::is_directory(dir))
+        {
             Util::color_print(P_ERROR, "Exception in get_dir_files: dir is not exists or dir is not a directory\n");
             return false;
         }
@@ -307,7 +357,8 @@ bool CFileUtil::get_dir_files(const fs::path& dir, std::set<fs::path>& files, bo
             for (const auto& entry : fs::directory_iterator(dir))
                 process_entry(entry);
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& e)
+    {
         Util::color_print(P_ERROR, "Exception in get_dir_files: %s\n", e.what());
         return false;
     }
@@ -316,11 +367,14 @@ bool CFileUtil::get_dir_files(const fs::path& dir, std::set<fs::path>& files, bo
 }
 
 
-bool CFileUtil::get_file_size(const fs::path& filePath, int& width, int& height) {
+bool CFileUtil::get_file_size(const fs::path& filePath, int& width, int& height)
+{
     nlohmann::json j;
     get_file_json_info(filePath, j);
-    for (const auto& stream : j["streams"]) {
-        if (stream["codec_type"] == "video") {
+    for (const auto& stream : j["streams"])
+    {
+        if (stream["codec_type"] == "video")
+        {
             width = stream["width"];
             height = stream["height"];
             return true;
@@ -330,16 +384,18 @@ bool CFileUtil::get_file_size(const fs::path& filePath, int& width, int& height)
     return false;
 }
 
-bool CFileUtil::jpg_to_png(const fs::path& jpgPath, const fs::path& pngPath) {
+bool CFileUtil::jpg_to_png(const fs::path& jpgPath, const fs::path& pngPath)
+{
     return png_to_jpg(jpgPath, pngPath);
 }
 
-bool CFileUtil::png_to_jpg(const fs::path& pngPath, const fs::path& jpgPath) {
-    std::string command = ffmpeg + "ffmpeg -hide_banner -loglevel error -i \""
-        + pngPath.string() + "\" \"" + jpgPath.string() + "\"";
-
+bool CFileUtil::png_to_jpg(const fs::path& pngPath, const fs::path& jpgPath)
+{
+    std::string command = CStringUtil::format("%sffmpeg -hide_banner -loglevel error -i \"%s\" \"%s\"",
+                                              FFMPEG_DIR, pngPath.string().data(), jpgPath.string().data());
     int result = std::system(command.c_str());
-    if (result != 0) {
+    if (result != 0)
+    {
         return false;
     }
     return true;
@@ -347,11 +403,13 @@ bool CFileUtil::png_to_jpg(const fs::path& pngPath, const fs::path& jpgPath) {
 
 
 std::string compress_command(const fs::path& filePath, int maxSize, double xScale, double yScale,
-    int& width, int& height, const fs::path compress_path) {
+                             int& width, int& height, const fs::path compress_path)
+{
     width *= xScale;
     height *= yScale;
 
-    if (width > maxSize || height > maxSize) {
+    if (width > maxSize || height > maxSize)
+    {
         double ratio = (std::max)(width, height) / static_cast<double>(maxSize);
         width = static_cast<int>(width / ratio);
         height = static_cast<int>(height / ratio);
@@ -363,16 +421,21 @@ std::string compress_command(const fs::path& filePath, int maxSize, double xScal
 
     std::string inputFile = filePath.string();
 
-    std::string command = ffmpeg + "ffmpeg -nostats -loglevel error -progress pipe:1 -hide_banner -y -i \"" + inputFile
-        + "\" -vf \"scale=" + std::to_string(width) + ":" + std::to_string(height) +
-        ",split[s0][s1];[s0]palettegen=reserve_transparent=1[p];[s1][p]paletteuse\" \"" +
-        compress_path.string() + "\"";
+    std::string command = CStringUtil::format(
+        "%sffmpeg -nostats -loglevel error -progress pipe:1 -hide_banner -y -i \"%s\" -vf \"scale=%d:%d,split[s0][s1];[s0]palettegen=reserve_transparent=1[p];[s1][p]paletteuse\" \"%s\"",
+        FFMPEG_DIR,
+        inputFile.c_str(), // 输入文件路径
+        width, // 宽度
+        height, // 高度
+        compress_path.string().c_str() // 输出文件路径
+    );
 
     return command;
 }
 
 fs::path CFileUtil::compress_video(const fs::path& filePath, int maxSize, double xScale, double yScale, int& width,
-    int& height) {
+                                   int& height)
+{
     std::string outputFile = filePath.parent_path().string() + FILE_SEP
         + filePath.stem().string()
         + "_compressed"
@@ -384,7 +447,8 @@ fs::path CFileUtil::compress_video(const fs::path& filePath, int maxSize, double
 }
 
 fs::path CFileUtil::compress_image(const fs::path& filePath, int maxSize, double xScale, double yScale, int& width,
-    int& height) {
+                                   int& height)
+{
     std::string outputFile = filePath.parent_path().string() + FILE_SEP
         + filePath.stem().string()
         + "_compressed"
@@ -392,38 +456,51 @@ fs::path CFileUtil::compress_image(const fs::path& filePath, int maxSize, double
     std::string command = compress_command(filePath, maxSize, xScale, yScale, width, height, outputFile);
 
     int result = system(command.data());
-    if (result != 0) {
+    if (result != 0)
+    {
         Util::color_print(P_ERROR, "compress image error\n");
     }
     return outputFile;
 }
 
-bool CFileUtil::get_file_json_info(const fs::path& file, nlohmann::json& j) {
+bool CFileUtil::get_file_json_info(const fs::path& file, nlohmann::json& j)
+{
     if (!CFileUtil::is_exists(file))
         return false;
-    std::string command = ffmpeg + "ffprobe -v quiet -print_format json -show_streams \"" + file.string() + "\"";
+    std::string command = CStringUtil::format(
+        "%sffprobe -v quiet -print_format json -show_streams \"%s\"",
+        FFMPEG_DIR,
+        file.string().data()
+    );
     std::string info_json;
-    if (!Util::get_cmd_output(command, info_json)) {
+    if (!Util::get_cmd_output(command, info_json))
+    {
         Util::color_print(P_ERROR, "get video info error\n");
         return false;
     }
-    try {
+    try
+    {
         j = nlohmann::json::parse(info_json);
     }
-    catch (const std::exception& e) {
+    catch (const std::exception& e)
+    {
         Util::color_print(P_ERROR, "get video info error: %s\n", e.what());
         return false;
     }
     return true;
 }
 
-void CFileUtil::ts_to_mp4(const fs::path& input_ts, const fs::path& output_mp4, std::string codec = "h264") {
-    if (codec == "h264" || codec == "hevc") {
+void CFileUtil::ts_to_mp4(const fs::path& input_ts, const fs::path& output_mp4, std::string codec = "h264")
+{
+    if (codec == "h264" || codec == "hevc")
+    {
     }
-    else if (codec == "h265") {
+    else if (codec == "h265")
+    {
         codec = "hevc";
     }
-    else {
+    else
+    {
         Util::color_print(P_ERROR, "unsupported video codec: %s\n", codec.data());
         return;
     }
@@ -432,43 +509,53 @@ void CFileUtil::ts_to_mp4(const fs::path& input_ts, const fs::path& output_mp4, 
     std::vector<std::string> codecs = video.get_codecs();
     std::string rule = "copy";
     auto it = std::find(codecs.begin(), codecs.end(), codec);
-    if (it == codecs.end()) {
+    if (it == codecs.end())
+    {
         rule = codec; /* 不存在相同的编码，使用转换 */
     }
 
-    std::string command = ffmpeg + "ffmpeg -y -hide_banner -loglevel error -i \""
-        + input_ts.string()
-        + "\" -c:v " + codec +
-        "_nvenc -x265-params log-level=0 -c:a copy -progress pipe:1 -nostats \""
-        + output_mp4.string() + "\"";
+    std::string command = CStringUtil::format(
+        "%sffmpeg -y -hide_banner -loglevel error -i \"%s\" -c:v %s_nvenc -x265-params log-level=0 -c:a copy -progress pipe:1 -nostats \"%s\"",
+        FFMPEG_DIR,
+        input_ts.string().data(),
+        codec.data(),
+        output_mp4.string().data()
+    );
 
     std::cout << "Converting " << input_ts << std::endl;
     long long total_duration = video.get_duration();
-    if (total_duration != 0) {
+    if (total_duration != 0)
+    {
         convert_progress(command, total_duration);
     }
-    else {
+    else
+    {
         if (system(command.c_str()) != 0)
             Util::color_print(P_ERROR, "error during video conversion\n");
     }
 }
 
 
-void CFileUtil::mp4_to_ts(const fs::path& input_mp4, const fs::path& output_ts) {
+void CFileUtil::mp4_to_ts(const fs::path& input_mp4, const fs::path& output_ts)
+{
     /* 获取视频编码信息 */
     nlohmann::json j;
-    if (!get_file_json_info(input_mp4, j)) {
+    if (!get_file_json_info(input_mp4, j))
+    {
         Util::color_print(P_ERROR, "Error getting video info.\n");
         return;
     }
     bool need_transcode = false;
     double total_duration = 0; /* 毫秒 */
 
-    for (const auto& stream : j["streams"]) {
-        if (stream["codec_type"] == "video") {
+    for (const auto& stream : j["streams"])
+    {
+        if (stream["codec_type"] == "video")
+        {
             std::string codec_name = stream["codec_name"];
             total_duration = std::stoll(std::string(stream["duration"])) * 1000;
-            if (codec_name != "h264") {
+            if (codec_name != "h264")
+            {
                 need_transcode = true;
                 break;
             }
@@ -480,24 +567,36 @@ void CFileUtil::mp4_to_ts(const fs::path& input_mp4, const fs::path& output_ts) 
 
     std::cout << "Converting " << input_mp4 << std::endl;
     std::string command;
-    if (need_transcode) {
+    if (need_transcode)
+    {
         /* 先转换为 H.264 编码，再转换为 TS 格式 */
-        command = ffmpeg + "ffmpeg -y -hide_banner -loglevel error -i \"" + input_mp4.string() +
-            "\" -c:v h264_nvenc -c:a copy -f mpegts -progress pipe:1 \"" + output_ts.string() + "\"";
+        command = CStringUtil::format(
+            "%sffmpeg -y -hide_banner -loglevel error -i \"%s\" -c:v h264_nvenc -c:a copy -f mpegts -progress pipe:1 \"%s\"",
+            FFMPEG_DIR,
+            input_mp4.string().data(),
+            output_ts.string().data()
+        );
     }
-    else {
+    else
+    {
         /* 直接复制编码到 TS 格式 */
-        command = ffmpeg + "ffmpeg -y -hide_banner -loglevel error -i \"" + input_mp4.string() +
-            "\" -c:v copy -c:a copy -f mpegts -progress pipe:1 \"" + output_ts.string() + "\"";
+        command = CStringUtil::format(
+            "%sffmpeg -y -hide_banner -loglevel error -i \"%s\" -c:v copy -c:a copy -f mpegts -progress pipe:1 \"%s\"",
+            FFMPEG_DIR,
+            input_mp4.string().data(),
+            output_ts.string().data()
+        );
     }
 
     convert_progress(command, total_duration);
 }
 
 
-void convert_progress(const std::string& command, long long total_duration) {
+void convert_progress(const std::string& command, long long total_duration)
+{
     FILE* pipe = _popen(command.c_str(), OPEN_MODE);
-    if (!pipe) {
+    if (!pipe)
+    {
         Util::color_print(P_ERROR, "Error opening pipe for ffmpeg.\n");
         return;
     }
@@ -506,19 +605,24 @@ void convert_progress(const std::string& command, long long total_duration) {
     bool cursor_visible = Util::is_cursor_visible();
     Util::set_cursor_visible(false);
     Util::print_progress_bar(0, total_duration);
-    while (fgets(line, sizeof(line), pipe) != nullptr) {
+    while (fgets(line, sizeof(line), pipe) != nullptr)
+    {
         std::string str = CStringUtil::trim(line);
-        if (str.find("out_time_us") != std::string::npos) {
+        if (str.find("out_time_us") != std::string::npos)
+        {
             std::string time = str.substr(str.find('=') + 1);
             double out_time_us = 0;
-            if (CMathUtil::is_numeric(time)) {
+            if (CMathUtil::is_numeric(time))
+            {
                 out_time_us = std::stod(time.data());
                 Util::print_progress_bar(out_time_us / 1000, total_duration);
             }
         }
-        if (str.find("progress") != std::string::npos) {
+        if (str.find("progress") != std::string::npos)
+        {
             std::string progress = str.substr(str.find('=') + 1);
-            if (progress == "end") {
+            if (progress == "end")
+            {
                 Util::print_progress_bar(total_duration, total_duration);
                 break;
             }
@@ -757,41 +861,49 @@ void convert_progress(const std::string& command, long long total_duration) {
 
 CVideoInfo::CVideoInfo(fs::path filepath)
     : m_filepath(filepath)
-    , m_fps(0)
-    , m_width(0)
-    , m_height(0)
-    , m_codecs({})
-    , m_duration(0) {
+      , m_fps(0)
+      , m_width(0)
+      , m_height(0)
+      , m_codecs({})
+      , m_duration(0)
+{
     init();
 }
 
-void CVideoInfo::init() {
-    if (CFileUtil::is_exists(m_filepath) && CFileUtil::is_file(m_filepath)) {
+void CVideoInfo::init()
+{
+    if (CFileUtil::is_exists(m_filepath) && CFileUtil::is_file(m_filepath))
+    {
         nlohmann::json j;
         if (!CFileUtil::get_file_json_info(m_filepath, j))
             return;
 
-        for (const auto& stream : j["streams"]) {
-            if (stream["codec_type"] == "video") {
+        for (const auto& stream : j["streams"])
+        {
+            if (stream["codec_type"] == "video")
+            {
                 std::string codec_name = stream["codec_name"];
                 m_codecs.push_back(codec_name);
 
                 m_width = stream["width"];
                 m_height = stream["height"];
 
-                if (stream.contains("avg_frame_rate")) {
+                if (stream.contains("avg_frame_rate"))
+                {
                     std::string avg_frame_rate = stream["avg_frame_rate"];
                     int num, den;
                     sscanf_s(avg_frame_rate.c_str(), "%d/%d", &num, &den);
                     m_fps = static_cast<double>(num) / den;
                 }
 
-                if (stream.contains("nb_frames")) {
+                if (stream.contains("nb_frames"))
+                {
                     std::string frames = stream["nb_frames"];
                     m_maxFrame = std::atoi(frames.data());
                 }
 
-                if (stream.contains("duration")) {
+                if (stream.contains("duration"))
+                {
                     std::string dur = stream["duration"];
                     m_duration = std::stoll(dur.data()) * 1000;
                 }

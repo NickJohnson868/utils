@@ -319,7 +319,7 @@ namespace Rename
 			std::string folder = rel_path.parent_path().string();
 			if (!folder.empty())
 			{
-				filename = folder + "\\" + filename;
+				filename = folder + FILE_SEP + filename;
 			}
 
 			table.push_back({ std::to_string(i), filename, extension,

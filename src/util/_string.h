@@ -1,4 +1,5 @@
 #pragma once
+#include "macro.h"
 
 #include <string>
 #include <algorithm>
@@ -11,8 +12,7 @@
 
 #define CP_GBK 936
 
-#ifdef _WIN32
-#elif __linux__
+#ifdef LINUX
 #define CP_UTF8 65001
 #endif
 

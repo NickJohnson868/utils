@@ -1,4 +1,6 @@
-﻿#ifdef _WIN32
+﻿#include "_inject.h"
+
+#ifdef WIN
 
 #include <iostream>
 #include <windows.h>
@@ -6,8 +8,6 @@
 #include <Tlhelp32.h>
 #include <string>
 #include <set>
-
-#include "_inject.h"
 
 #include "_string.h"
 
@@ -78,11 +78,11 @@ bool CInjectUtil::uninject_dll(DWORD dwProcessId, std::wstring dll_name)
     bool isFound = false;
     do
     {
-#ifdef __MINGW32__
+#ifdef MINGW
         std::string dll_name_a = CStringUtil::wstring_to_multibyte(dll_name, CP_GBK);
         isFound = (0 == ::lstrcmpiA(me32.szModule, dll_name_a.c_str()) || 0 == ::lstrcmpiA(
             me32.szExePath, dll_name_a.c_str()));
-#else
+#elif defined(MSVC)
 		isFound = (0 == ::lstrcmpiW(me32.szModule, dll_name.c_str()) || 0 == ::lstrcmpiW(me32.szExePath, dll_name.c_str()));
 #endif
         if (isFound) /* 找到指定模块 */
@@ -155,10 +155,10 @@ bool CInjectUtil::inject_dll(DWORD pid, std::wstring dll_path)
         return false;
     }
 
-#ifdef __MINGW32__
+#ifdef MINGW
     PTHREAD_START_ROUTINE pfnStartAddress = (PTHREAD_START_ROUTINE)GetProcAddress(
         GetModuleHandle("kernel32.dll"), "LoadLibraryW");
-#else
+#elif defined(MSVC)
 	PTHREAD_START_ROUTINE pfnStartAddress = (PTHREAD_START_ROUTINE)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW");
 #endif
     if (!pfnStartAddress)

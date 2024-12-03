@@ -1,6 +1,7 @@
-#ifdef _WIN32
-
 #include "_registry.h"
+
+#ifdef WIN
+
 #include "util.h"
 #include "_string.h"
 

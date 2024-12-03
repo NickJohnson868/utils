@@ -1,3 +1,5 @@
+#include "_string.h"
+
 #include <sstream>
 #include <random>
 #include <iomanip>
@@ -5,11 +7,9 @@
 #include <regex>
 #include <cstdarg>
 
-#include "_string.h"
-
-#ifdef _WIN32
+#ifdef WIN
 #include <windows.h>
-#elif __linux__
+#elif LINUX
 #include <iconv.h>
 #define CP_TO(x) x==CP_GBK?("GBK"):(x==CP_UTF8?"UTF-8":"")
 #endif
@@ -20,7 +20,7 @@ std::string CStringUtil::utf8_to_gbk(const std::string& str_utf8)
 	if (str_utf8.empty()) {
 		return "";
 	}
-#ifdef _WIN32
+#ifdef WIN
 	/* Step 1: UTF-8 转 WideChar (Unicode) */
 	int wideCharSize = MultiByteToWideChar(CP_UTF8, 0, str_utf8.c_str(), static_cast<int>(str_utf8.size()), nullptr, 0);
 	if (wideCharSize == 0)
@@ -38,7 +38,7 @@ std::string CStringUtil::utf8_to_gbk(const std::string& str_utf8)
 	WideCharToMultiByte(CP_GBK, 0, wideStr.c_str(), wideCharSize, &gbkStr[0], gbkSize, nullptr, nullptr);
 
 	return gbkStr;
-#elif __linux__
+#elif LINUX
 	// 创建 iconv 转换描述符
 	iconv_t cd = iconv_open("GBK", "UTF-8");
 	if (cd == (iconv_t)-1) {
@@ -74,7 +74,7 @@ std::string CStringUtil::gbk_to_utf8(const std::string& str_gbk)
 	if (str_gbk.empty())
 		return "";
 
-#ifdef _WIN32
+#ifdef WIN
 	/* Step 1: GBK 转 WideChar (Unicode) */
 	int wideCharSize = MultiByteToWideChar(CP_GBK, 0, str_gbk.c_str(), static_cast<int>(str_gbk.size()), nullptr, 0);
 	if (wideCharSize == 0)
@@ -92,7 +92,7 @@ std::string CStringUtil::gbk_to_utf8(const std::string& str_gbk)
 	WideCharToMultiByte(CP_UTF8, 0, wideStr.c_str(), wideCharSize, &utf8Str[0], utf8Size, nullptr, nullptr);
 
 	return utf8Str;
-#elif __linux__
+#elif LINUX
 	// 创建 iconv 转换描述符
 	iconv_t cd = iconv_open("UTF-8", "GBK");
 	if (cd == (iconv_t)-1) {
@@ -127,7 +127,7 @@ std::string CStringUtil::wstring_to_multibyte(const std::wstring& wstr, UINT cod
 	if (wstr.empty())
 		return "";
 
-#ifdef _WIN32
+#ifdef WIN
 	int sizeNeeded = WideCharToMultiByte(
 		codePage,                       /* 代码页，例如 CP_UTF8 或 CP_ACP */
 		0,                              /* 转换标志 */
@@ -146,7 +146,7 @@ std::string CStringUtil::wstring_to_multibyte(const std::wstring& wstr, UINT cod
 	);
 
 	return result;
-#elif __linux__
+#elif LINUX
 	// 创建 iconv 转换描述符
 	iconv_t cd = iconv_open(CP_TO(codePage), "WCHAR_T");
 	if (cd == (iconv_t)-1) {
@@ -177,7 +177,7 @@ std::wstring CStringUtil::multibyte_to_wstring(const std::string& str, UINT code
 	if (str.empty())
 		return L"";
 
-#ifdef _WIN32
+#ifdef WIN
 	int sizeNeeded = MultiByteToWideChar(
 		codePage,                       /* 代码页，例如 CP_UTF8 或 CP_ACP */
 		0,                              /* 转换标志 */
@@ -194,7 +194,7 @@ std::wstring CStringUtil::multibyte_to_wstring(const std::string& str, UINT code
 	);
 
 	return result;
-#elif __linux__
+#elif LINUX
 	// 创建 iconv 转换描述符
 	iconv_t cd = iconv_open("WCHAR_T", CP_TO(codePage));
 	if (cd == (iconv_t)-1) {

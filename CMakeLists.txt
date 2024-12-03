@@ -84,3 +84,5 @@ target_link_libraries(utils PRIVATE ${LIBRARY_PATH})
 if (WIN32)
     target_link_libraries(utils PRIVATE winmm)
 endif ()
+
+target_compile_definitions(utils PRIVATE PROJECT_ROOT_PATH="${CMAKE_SOURCE_DIR}")
