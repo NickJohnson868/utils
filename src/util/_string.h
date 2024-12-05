@@ -106,10 +106,10 @@ public:
 
 		if (CHECK_TEMP_STRING)
 		{
-			std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return toupper(c); });
+			std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return tolower(c); });
 		}
 		else {
-			std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return towupper(c); });
+			std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return towlower(c); });
 		}
 	}
 

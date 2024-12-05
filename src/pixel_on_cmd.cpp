@@ -32,7 +32,7 @@ BOOL WINAPI signal_handler(DWORD dwCtrlType)
     case CTRL_CLOSE_EVENT:
         printf("\033c");
         close_player();
-        reset_screen(192, 20);
+        set_font_size(20);
         return true;
     default:
         return false;
@@ -82,7 +82,7 @@ void play_video(std::filesystem::path file, int maxSize = 192, int font = 16)
 
     video->read_video(file, t, maxSize);
     printf("\033c");
-    reset_screen(maxSize, font);
+    set_font_size(font);
     video->display();
     close_player();
 }

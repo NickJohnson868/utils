@@ -41,7 +41,7 @@ bool CProcUtil::close_process_by_id(const PID_TYPE proc_id)
 std::set<PID_TYPE> CProcUtil::get_proc_id_by_name(const PROC_TYPE proc_name)
 {
 	std::set<PID_TYPE> id_list;
-#ifdef MSVC
+#ifdef WIN
 	PROCESSENTRY32 pe = { sizeof(PROCESSENTRY32) };
 	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, 0);
 	if (hSnapshot != INVALID_HANDLE_VALUE)
@@ -62,7 +62,6 @@ std::set<PID_TYPE> CProcUtil::get_proc_id_by_name(const PROC_TYPE proc_name)
 		}
 		CloseHandle(hSnapshot);
 	}
-	return id_list;
 #elif defined(LINUX)
 	DIR* dir = opendir("/proc");
 	if (dir == nullptr) {
@@ -91,6 +90,6 @@ std::set<PID_TYPE> CProcUtil::get_proc_id_by_name(const PROC_TYPE proc_name)
 		}
 	}
 	closedir(dir);
-	return id_list;
 #endif
+	return id_list;
 }

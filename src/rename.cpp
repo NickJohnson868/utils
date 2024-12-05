@@ -12,8 +12,11 @@
 
 using namespace std;
 
+namespace fs = std::filesystem;
+
 static unsigned int	ser_num = 1;
-static string work_dir = "", prefix = "", suffix = "";
+static fs::path work_dir = "";
+static string prefix = "", suffix = "";
 
 namespace Rename
 {
@@ -23,13 +26,13 @@ namespace Rename
 
 	bool execute_rename_file(const filesystem::path& file, string name, filesystem::path& new_file);
 
-	void show(const set<filesystem::path>& files, const string& work_dir);
+	void show(const set<filesystem::path>& files, const fs::path& work_dir);
 
 	bool is_image(const string& ext);
 
 	bool is_video(const string& ext);
 
-	void scan_dir(const string& work_dir, std::set<fs::path>& files)
+	void scan_dir(const fs::path& work_dir, std::set<fs::path>& files)
 	{
 		files.clear();
 		CFileUtil::get_dir_files(work_dir, files, false, false);
@@ -229,8 +232,11 @@ namespace Rename
 			cout << "\n";
 			Util::color_print(P_INFO, "step 1: ");
 			cout << "please input work dir: ";
-			work_dir = "";
-			std::getline(std::cin, work_dir);
+			string work_dir_str = "";
+			std::getline(std::cin, work_dir_str);
+			if (work_dir_str == "桌面" || CStringUtil::compare_ignore_case<string>("desktop", work_dir_str)) 
+				work_dir = CFileUtil::get_desktop_dir();
+			else work_dir = work_dir_str;
 			if (!CFileUtil::is_exists(work_dir))
 			{
 				cout << "dir is not exists" << endl;
@@ -299,7 +305,7 @@ namespace Rename
 	}
 
 
-	void show(const std::set<filesystem::path>& files, const std::string& work_dir)
+	void show(const std::set<filesystem::path>& files, const fs::path& work_dir)
 	{
 		cout << "Reading directory information" << endl;
 		bool cursor_visible = Util::is_cursor_visible();

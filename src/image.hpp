@@ -32,7 +32,7 @@
 #define CHARACTER "#"
 namespace fs = std::filesystem;
 
-void reset_screen(int max_size = 192, int font_size = 8);
+void set_font_size(int font_size = 8);
 
 int enable_vt_mode();
 
@@ -336,8 +336,7 @@ int enable_vt_mode() {
 #endif
 }
 
-
-void reset_screen(int max_size, int font_size) {
+void set_font_size(int font_size) {
 #ifdef WIN
 	HANDLE hConsoleOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (hConsoleOutput == INVALID_HANDLE_VALUE)
@@ -365,8 +364,5 @@ void reset_screen(int max_size, int font_size) {
 
 	HWND consoleWindow = GetConsoleWindow();
 	ShowWindow(consoleWindow, SW_MAXIMIZE);
-
-	std::string s = "mode con cols=" + std::to_string(max_size) + " lines=" + std::to_string(max_size);
-	system(s.data());
 #endif
 }

@@ -4,6 +4,9 @@
 
 #include <filesystem>
 #include <set>
+#ifdef WIN
+#include <windows.h>
+#endif
 
 #include "nlohmann/json.hpp"
 #include "OpenXLSX.hpp"
@@ -26,6 +29,14 @@ public:
 
 	static bool is_hidden(const fs::path& file);
 
+#ifdef WIN
+	static bool hide_file(const fs::path& file);
+
+	static bool show_file(const fs::path& file);
+
+	static bool modify_file_attribute(const fs::path& file, DWORD attribute, bool add);
+#endif
+
 	static void ensure_directory_exists(const fs::path& dir);
 
 	static bool is_exists(const fs::path& f);
@@ -39,6 +50,8 @@ public:
 	static fs::path get_project_dir();
 
 	static fs::path get_exe_dir();
+
+	static fs::path get_desktop_dir();
 
 	static fs::path get_parent_dir(const fs::path& file);
 
