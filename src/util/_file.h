@@ -47,8 +47,6 @@ public:
 
 	static fs::path get_exe_path();
 
-	static fs::path get_project_dir();
-
 	static fs::path get_exe_dir();
 
 	static fs::path get_desktop_dir();

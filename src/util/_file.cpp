@@ -224,18 +224,6 @@ fs::path CFileUtil::get_exe_path() {
     return std::filesystem::path(buffer);
 }
 
-fs::path CFileUtil::get_project_dir() {
-#ifdef MINGW
-    std::string p = PROJECT_ROOT_PATH;
-    return CStringUtil::replace_all<std::string>(p, "/", "\\");
-#elif defined(LINUX)
-    std::string p = PROJECT_ROOT_PATH;
-    return CStringUtil::replace_all<std::string>(p, "\\", "/");
-#elif defined(MSVC)
-    return fs::current_path();
-#endif
-}
-
 fs::path CFileUtil::get_exe_dir() {
     return CFileUtil::get_exe_path().parent_path();
 }

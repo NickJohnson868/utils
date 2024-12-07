@@ -111,7 +111,7 @@ namespace PixelOnCmd
 
         if (argc <= 1)
         {
-            string file = CStringUtil::format("%s%s%s%s%s", CFileUtil::get_project_dir().string().data(),
+            string file = CStringUtil::format("%s%s%s%s%s", CFileUtil::get_exe_dir().string().data(),
                                               FILE_SEP, "res", FILE_SEP, "24fps.mp4");
             cout << file << endl;
             play_video(file, 256, 1);

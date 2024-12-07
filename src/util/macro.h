@@ -32,13 +32,13 @@
 
 #ifdef WIN
 #define FILE_SEP "\\"
-#define FFMPEG_DIR (CFileUtil::get_project_dir().string() + FILE_SEP + "ffmpeg\\").data()
+#define FFMPEG_DIR (CFileUtil::get_exe_dir().string() + FILE_SEP + "ffmpeg\\").data()
 #define OPEN_MODE "rb"
 #elif defined(LINUX)
 #define _popen popen
 #define _pclose pclose
 #define sscanf_s sscanf
 #define FILE_SEP "/"
-#define FFMPEG_DIR (CFileUtil::get_project_dir().string() + FILE_SEP + "ffmpeg/").data()
+#define FFMPEG_DIR (CFileUtil::get_exe_dir().string() + FILE_SEP + "ffmpeg/").data()
 #define OPEN_MODE "r"
 #endif
