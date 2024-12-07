@@ -18,9 +18,8 @@ bool CProcUtil::close_process_by_name(const PROC_TYPE proc_name)
 {
 	std::set<PID_TYPE> id_list = get_proc_id_by_name(proc_name);
 	for (auto& id : id_list)
-	{
-		return close_process_by_id(id);
-	}
+		close_process_by_id(id);
+	return true;
 }
 
 bool CProcUtil::close_process_by_id(const PID_TYPE proc_id)
@@ -33,6 +32,7 @@ bool CProcUtil::close_process_by_id(const PID_TYPE proc_id)
 		CloseHandle(hProecss);
 		return res;
 	}
+	return false;
 #elif defined(LINUX)
 	return kill(proc_id, SIGTERM) == 0;  // 尝试终止进程
 #endif
